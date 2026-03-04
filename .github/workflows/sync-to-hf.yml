@@ -1,43 +1,61 @@
 name: Sync to Hugging Face
 
 on:
-  # 每天北京时间早上8点自动运行（UTC时间0点）
   schedule:
     - cron: '0 0 * * *'
-  # 也可以手动触发
   workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      # 1. 检出仓库
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # 如果项目包含大文件，建议开启 lfs
-          lfs: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2. 从原仓库拉取最新代码并合并
       - name: Sync from upstream
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git remote add upstream https://github.com/libaxuan/cursor2api-go.git || true
           git fetch upstream
-          # 合并上游代码，如果已经是最新则跳过
+          # 合并上游代码
           git merge upstream/main --allow-unrelated-histories -m "Sync from upstream" || echo "Already up to date"
-          git push origin main || echo "Nothing to push"
 
-      # 3. 推送到 Hugging Face
+      - name: Add HF config to README
+        run: |
+          # 定义 Hugging Face 必须的元数据头
+          HF_HEADER="---
+          title: Cursor2API
+          emoji: 🚀
+          colorFrom: blue
+          colorTo: purple
+          sdk: docker
+          app_port: 7860
+          pinned: false
+          ---"
+          
+          # 检查 README.md 是否已经包含元数据（通过检查第一个 ---）
+          if ! head -n 1 README.md | grep -q "^---"; then
+            echo "Adding HF Metadata to README.md"
+            echo -e "$HF_HEADER\n\n$(cat README.md)" > README.md
+            git add README.md
+            git commit -m "docs: add Hugging Face Space metadata" || echo "No changes to commit"
+          else
+            echo "HF Metadata already exists, skipping."
+          fi
+
+      - name: Push changes to GitHub
+        run: git push origin main || echo "Nothing to push to GitHub"
+
       - name: Push to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_SPACE_NAME: ${{ secrets.HF_SPACE_NAME }}
         run: |
-          # 这里的 HF_SPACE_NAME 格式应为: 用户名/Space名称
           git remote add hf https://huggingface.co/spaces/$HF_SPACE_NAME || true
-          # 使用 token 进行鉴权推送
+          # 使用 x-token 作为用户名是 HF 推荐的标准做法
           git remote set-url hf https://x-token:$HF_TOKEN@huggingface.co/spaces/$HF_SPACE_NAME
           git push hf main:main --force
