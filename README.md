@@ -1,3 +1,13 @@
+---
+title: Cursor2API
+emoji: 🚀
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Cursor2API
 
 [English](README_EN.md) | 简体中文
