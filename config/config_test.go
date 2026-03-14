@@ -30,7 +30,7 @@ func TestLoadConfig(t *testing.T) {
 	envContent := `PORT=9000
 DEBUG=true
 API_KEY=test-key
-MODELS=gpt-4o,claude-3
+MODELS=claude-sonnet-4.6
 SYSTEM_PROMPT_INJECT=Test prompt
 TIMEOUT=60
 MAX_INPUT_LENGTH=10000
@@ -78,14 +78,13 @@ SCRIPT_URL=https://test.com/script.js`
 
 func TestGetModels(t *testing.T) {
 	config := &Config{
-		Models: "gpt-4o, claude-3 , gpt-3.5",
+		Models: "claude-sonnet-4.6",
 	}
 
 	models := config.GetModels()
 	expected := []string{
-		"gpt-4o", "gpt-4o-thinking",
-		"claude-3", "claude-3-thinking",
-		"gpt-3.5", "gpt-3.5-thinking",
+		"claude-sonnet-4.6",
+		"claude-sonnet-4.6-thinking",
 	}
 
 	if len(models) != len(expected) {
@@ -101,7 +100,7 @@ func TestGetModels(t *testing.T) {
 
 func TestIsValidModel(t *testing.T) {
 	config := &Config{
-		Models: "gpt-4o,claude-3,gpt-3.5",
+		Models: "claude-sonnet-4.6",
 	}
 
 	tests := []struct {
@@ -109,10 +108,9 @@ func TestIsValidModel(t *testing.T) {
 		model    string
 		expected bool
 	}{
-		{"valid model gpt-4o", "gpt-4o", true},
-		{"valid thinking model gpt-4o-thinking", "gpt-4o-thinking", true},
-		{"valid model claude-3", "claude-3", true},
-		{"invalid model gpt-5", "gpt-5", false},
+		{"valid base model", "claude-sonnet-4.6", true},
+		{"valid thinking model", "claude-sonnet-4.6-thinking", true},
+		{"invalid model", "unknown-model", false},
 		{"empty model", "", false},
 	}
 

@@ -120,7 +120,7 @@ func TestToCursorMessages(t *testing.T) {
 func TestNewChatCompletionResponse(t *testing.T) {
 	response := NewChatCompletionResponse(
 		"test-id",
-		"gpt-4o",
+		"claude-sonnet-4.6",
 		Message{Role: "assistant", Content: "Hello world"},
 		"stop",
 		Usage{PromptTokens: 10, CompletionTokens: 5, TotalTokens: 15},
@@ -129,8 +129,8 @@ func TestNewChatCompletionResponse(t *testing.T) {
 	if response.ID != "test-id" {
 		t.Errorf("ID = %v, want test-id", response.ID)
 	}
-	if response.Model != "gpt-4o" {
-		t.Errorf("Model = %v, want gpt-4o", response.Model)
+	if response.Model != "claude-sonnet-4.6" {
+		t.Errorf("Model = %v, want claude-sonnet-4.6", response.Model)
 	}
 	if response.Choices[0].Message.Content != "Hello world" {
 		t.Errorf("Content = %v, want Hello world", response.Choices[0].Message.Content)
@@ -143,7 +143,7 @@ func TestNewChatCompletionResponse(t *testing.T) {
 func TestNewChatCompletionStreamResponse(t *testing.T) {
 	response := NewChatCompletionStreamResponse(
 		"test-id",
-		"gpt-4o",
+		"claude-sonnet-4.6",
 		StreamDelta{Content: "Hello"},
 		stringPtr("stop"),
 	)
